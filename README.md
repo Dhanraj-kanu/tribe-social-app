@@ -180,7 +180,7 @@ Create `server/.env`:
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/tribe
 JWT_SECRET=your_super_secret_key
-JWT_EXPIRE=7d
+JWT_EXPIRE=Your_key
 CLIENT_URL=http://localhost:5173
 ```
 
