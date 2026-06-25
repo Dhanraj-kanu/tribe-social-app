@@ -1,0 +1,22 @@
+{
+  "name": "tribe",
+  "version": "1.0.0",
+  "description": "Tribe - Social Media Chat App (MERN Stack)",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "concurrently": "^9.0.1"
+  },
+  "dependencies": {
+    "mongodb": "^7.2.0"
+  }
+}
