@@ -18,10 +18,10 @@ export const createPost = async (req, res) => {
   try {
     const { text } = req.body;
     let image = '';
-    let mediaType = 'image';
+    let mediaType = 'text';
 
     if (req.file) {
-      image = `/uploads/${req.file.filename}`;
+      image = req.file.path;
       mediaType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
     }
 

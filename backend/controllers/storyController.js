@@ -19,7 +19,7 @@ export const createStory = async (req, res) => {
     
     const storyData = {
       user: req.user._id,
-      media: `/uploads/${req.file.filename}`,
+      media: req.file.path,
       mediaType,
       caption: req.body.caption || ''
     };

@@ -40,10 +40,10 @@ export const updateProfile = async (req, res) => {
 
     if (req.files) {
       if (req.files.profilePhoto) {
-        updates.profilePhoto = `/uploads/${req.files.profilePhoto[0].filename}`;
+        updates.profilePhoto = req.files.profilePhoto[0].path;
       }
       if (req.files.coverPhoto) {
-        updates.coverPhoto = `/uploads/${req.files.coverPhoto[0].filename}`;
+        updates.coverPhoto = req.files.coverPhoto[0].path;
       }
     }
 

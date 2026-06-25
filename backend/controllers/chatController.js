@@ -113,16 +113,21 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { conversationId, text } = req.body;
-    let file = '';
-    let fileType = '';
-    
+    let file = null;
+    let fileType = null;
+    let fileName = null;
+    let fileSize = null;
+
     if (req.file) {
-      file = `/uploads/${req.file.filename}`;
+      file = req.file.path;
       if (req.file.mimetype.startsWith('image/')) fileType = 'image';
       else if (req.file.mimetype.startsWith('video/')) fileType = 'video';
       else if (req.file.mimetype.startsWith('audio/')) fileType = 'audio';
       else if (req.file.mimetype === 'application/pdf') fileType = 'pdf';
-      else fileType = 'other';
+      else fileType = 'document';
+      
+      fileName = req.file.originalname;
+      fileSize = req.file.size;
     }
 
     const message = await Message.create({
