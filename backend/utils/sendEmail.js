@@ -1,25 +1,24 @@
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 
 const sendEmail = async ({ to, subject, html }) => {
-  // Use the API key from environment variables, fallback to the one provided for local testing if missing
-  const resend = new Resend(process.env.RESEND_API_KEY || 're_271L77QW_5v8orqxjM2xJnYwU8LPrk9Ef');
+  // Use the SendGrid API key from Environment Variables
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+  const msg = {
+    to,
+    from: `"Tribe App" <${process.env.SENDGRID_FROM_EMAIL || 'tribesupportteam@gmail.com'}>`, // MUST be the verified single sender
+    subject,
+    html,
+  };
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Tribe App <onboarding@resend.dev>', // Resend requires sending from onboarding@resend.dev for free unverified domains
-      to: [to],
-      subject,
-      html,
-    });
-
-    if (error) {
-      console.error('Resend API Error:', error);
-      throw new Error(error.message);
-    }
-
-    console.log(`✅ Email sent to ${to}`, data);
+    await sgMail.send(msg);
+    console.log(`✅ Email sent to ${to}`);
   } catch (error) {
-    console.error('Email Sending Failed:', error);
+    console.error('SendGrid Error:', error);
+    if (error.response) {
+      console.error(error.response.body);
+    }
     throw error;
   }
 };
