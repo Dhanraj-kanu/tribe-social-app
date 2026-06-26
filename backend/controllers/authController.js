@@ -43,17 +43,30 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    try {
-      await sendEmailVerification(user.email, otp);
-      res.status(201).json({ 
-        message: 'Verification code sent to your email',
-        requiresVerification: true,
-        email: user.email
-      });
-    } catch (emailError) {
-      console.error('Email sending error:', emailError);
-      res.status(500).json({ message: 'Failed to send verification email. Please try again later.' });
-    }
+    // Temporary bypass because Render blocks outbound SMTP ports on free tier
+    user.isVerified = true;
+    user.verifyEmailOTP = undefined;
+    user.verifyEmailExpire = undefined;
+    await user.save();
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      message: 'Account created successfully (Email verification bypassed)',
+      requiresVerification: false,
+      token,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        profilePhoto: user.profilePhoto,
+        bio: user.bio,
+        followers: user.followers,
+        following: user.following,
+        friends: user.friends
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
