@@ -43,30 +43,17 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    // Temporary bypass because Render blocks outbound SMTP ports on free tier
-    user.isVerified = true;
-    user.verifyEmailOTP = undefined;
-    user.verifyEmailExpire = undefined;
-    await user.save();
-
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      message: 'Account created successfully (Email verification bypassed)',
-      requiresVerification: false,
-      token,
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        fullName: user.fullName,
-        profilePhoto: user.profilePhoto,
-        bio: user.bio,
-        followers: user.followers,
-        following: user.following,
-        friends: user.friends
-      }
-    });
+    try {
+      await sendEmailVerification(user.email, otp);
+      res.status(201).json({ 
+        message: 'Verification code sent to your email',
+        requiresVerification: true,
+        email: user.email
+      });
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      res.status(500).json({ message: 'Failed to send verification email. Please try again later.' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -144,16 +131,14 @@ export const login = async (req, res) => {
       user.verifyEmailExpire = Date.now() + 10 * 60 * 1000;
       await user.save({ validateBeforeSave: false });
       
-      // Temporary bypass: Don't send email, just let them see it in Render Logs
-      // try {
-      //   await sendEmailVerification(user.email, otp);
-      // } catch (err) {
-      //   console.error('Failed to resend verification on unverified login', err);
-      // }
-      console.log(`\n\n🔑 LOGIN OTP for ${user.email}\nCode: ${otp}\n\n`);
+      try {
+        await sendEmailVerification(user.email, otp);
+      } catch (err) {
+        console.error('Failed to resend verification on unverified login', err);
+      }
       
       return res.status(403).json({ 
-        message: 'Please verify your email address to continue. Check Render Logs for the code.',
+        message: 'Please verify your email address to continue. A new code has been sent.',
         requiresVerification: true,
         email: user.email
       });
@@ -221,10 +206,8 @@ export const forgotPassword = async (req, res) => {
 
     // Send the OTP via email
     try {
-      // Temporary bypass: Render blocks SMTP. Just log it so user can copy it from logs.
-      console.log(`\n\n🔑 PASSWORD RESET OTP for ${user.email}\nCode: ${otp}\nExpires in 10 minutes\n\n`);
-      // await sendPasswordResetEmail(user.email, otp);
-      res.status(200).json({ message: 'Render SMTP blocked: Check Render Logs for your OTP code!' });
+      await sendPasswordResetEmail(user.email, otp);
+      res.status(200).json({ message: 'Password reset code sent to your email' });
     } catch (emailError) {
       // If email fails, clear the OTP fields
       user.resetPasswordOTP = undefined;

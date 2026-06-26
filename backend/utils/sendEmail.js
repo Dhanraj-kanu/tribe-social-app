@@ -1,26 +1,25 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-  });
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-  const mailOptions = {
-    from: `"Tribe App" <${process.env.EMAIL_USER}>`,
+  const msg = {
     to,
+    from: `"Tribe App" <${process.env.SENDGRID_FROM_EMAIL || 'tribesupportteam@gmail.com'}>`, // Use verified sender
     subject,
-    html
+    html,
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log(`✅ Email sent to ${to}`);
+  try {
+    await sgMail.send(msg);
+    console.log(`✅ Email sent to ${to}`);
+  } catch (error) {
+    console.error('SendGrid Error:', error);
+    if (error.response) {
+      console.error(error.response.body);
+    }
+    throw error;
+  }
 };
 
 export const sendPasswordResetEmail = async (email, otp) => {
