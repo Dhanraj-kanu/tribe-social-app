@@ -36,7 +36,8 @@ const allowedOrigins = (origin, callback) => {
     origin.match(/^https?:\/\/172\.(1[6-9]|2[0-9]|3[01])\./) ||
     origin.includes('ngrok') ||
     origin.includes('ngrok-free.app') ||
-    origin === process.env.CLIENT_URL
+    origin === process.env.CLIENT_URL ||
+    origin.endsWith('.vercel.app')
   ) {
     return callback(null, true);
   }
