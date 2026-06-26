@@ -144,14 +144,16 @@ export const login = async (req, res) => {
       user.verifyEmailExpire = Date.now() + 10 * 60 * 1000;
       await user.save({ validateBeforeSave: false });
       
-      try {
-        await sendEmailVerification(user.email, otp);
-      } catch (err) {
-        console.error('Failed to resend verification on unverified login', err);
-      }
+      // Temporary bypass: Don't send email, just let them see it in Render Logs
+      // try {
+      //   await sendEmailVerification(user.email, otp);
+      // } catch (err) {
+      //   console.error('Failed to resend verification on unverified login', err);
+      // }
+      console.log(`\n\n🔑 LOGIN OTP for ${user.email}\nCode: ${otp}\n\n`);
       
       return res.status(403).json({ 
-        message: 'Please verify your email address to continue. A new code has been sent.',
+        message: 'Please verify your email address to continue. Check Render Logs for the code.',
         requiresVerification: true,
         email: user.email
       });
@@ -219,8 +221,10 @@ export const forgotPassword = async (req, res) => {
 
     // Send the OTP via email
     try {
-      await sendPasswordResetEmail(user.email, otp);
-      res.status(200).json({ message: 'Password reset code sent to your email' });
+      // Temporary bypass: Render blocks SMTP. Just log it so user can copy it from logs.
+      console.log(`\n\n🔑 PASSWORD RESET OTP for ${user.email}\nCode: ${otp}\nExpires in 10 minutes\n\n`);
+      // await sendPasswordResetEmail(user.email, otp);
+      res.status(200).json({ message: 'Render SMTP blocked: Check Render Logs for your OTP code!' });
     } catch (emailError) {
       // If email fails, clear the OTP fields
       user.resetPasswordOTP = undefined;
